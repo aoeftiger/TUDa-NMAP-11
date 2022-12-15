@@ -1,8 +1,8 @@
 # Numerical Methods of Accelerator Physics
 
-MSc lecture at TU Darmstadt, etit, TEMF by Adrian Oeftiger in 2022.
+MSc lecture at TU Darmstadt, etit, TEMF by Adrian Oeftiger in 2022/23.
 
-Eleventh part of a jupyter notebook lecture series, guest lecture held by Dr. Michael Schenk on 20.01.2022.
+Eleventh part of a jupyter notebook lecture series, guest lecture held by Dr. Michael Schenk on 20.01.2023.
 
 Find the rendered HTML slides [here](https://aoeftiger.github.io/TUDa-NMAP-11/).
 
