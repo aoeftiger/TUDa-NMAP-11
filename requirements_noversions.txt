@@ -8,3 +8,6 @@ rise
 
 tqdm
 ipywidgets
+
+tensorflow
+prettytable
