@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import tqdm
+from tqdm.notebook import trange
 
 from tensorflow import keras
 from tensorflow.keras.layers import Dense
@@ -9,7 +9,7 @@ from tensorflow.keras import Sequential
 
 
 class Maze:
-    """ Define a Maze environment. """
+    """ Define a simple grid maze environment. """
     def __init__(self, height=4, width=4, target_position=None,
                  fire_reward=-10, fire_positions=None):
         self.height = height
@@ -202,6 +202,8 @@ class QTable:
                 self.history[k][kk].append(vv[0])
 
     def update(self, samples):
+        """ Perform the TD rule update to the Q-table using a batch of
+        samples. """
         self._update_history()
 
         states = samples[:][0]
@@ -223,16 +225,20 @@ class QTable:
             self.q[state][action] += (self.alpha * (target_q - self.q[state][action]))
         
     def get_greedy_action(self, state):
+        """ Given the state, return the action that maximizes the Q-value given
+        the current Q-table values. """
         q_a_dict = self.q[tuple(state)]
         return max(q_a_dict, key=q_a_dict.get)
     
     def get_v_table(self):
+        """ Return the current state-value table. """
         v_table = {}
         for key, val in self.q.items():
             v_table[key] = np.max(list(val.values()))
         return v_table
     
     def get_q_table(self):
+        """ Return the current Q-table. """
         q_table = {}
         for w in range(self.width):
             for h in range(self.height):
@@ -243,6 +249,8 @@ class QTable:
         return q_table
     
     def get_greedy_policy(self):
+        """ Given the current Q-table values, pick the best actions in each state
+        (greedily) and return that policy. """
         policy = {}
         for key, val in self.q.items():
             policy[key] = self.get_greedy_action(key)
@@ -265,6 +273,7 @@ class QNet:
         self.width = env.width
 
     def create_q_model(self):
+        """ Initialize the q-net with a fixed size and architecture. """
         model = Sequential() 
         model.add(Dense(32, activation="relu", input_dim=self.dim_state))
         model.add(Dense(32, activation="relu"))
@@ -273,6 +282,8 @@ class QNet:
         return model
     
     def update(self, samples):
+        """ Update the q-net weights according to the TD update rule,
+        using a batch of experiences. """
         states = samples[:][0]
         actions = samples[:][1]
         rewards = samples[:][2]
@@ -291,11 +302,15 @@ class QNet:
         self.q_model.fit(states, target_f, epochs=1, verbose=0)
         
     def get_greedy_action(self, state):
+        """ Given the state, return the action that maximizes the Q-value given
+        the current Q-net. """
         state = np.reshape(state, [1, self.dim_state])
         action_idx = np.argmax(self.q_model(state))
         return self.action_list[action_idx]
     
     def get_v_table(self):
+        """ Create the v-table for each state  using the trained NN
+        and return it. """
         v_table = {}
         for w in range(self.width):
             for h in range(self.height):
@@ -303,6 +318,8 @@ class QNet:
         return v_table
     
     def get_q_table(self):
+        """ Create the Q-table for each state-action pair using the
+        trained NN and return it. """
         q_table = {}
         for w in range(self.width):
             for h in range(self.height):
@@ -313,6 +330,8 @@ class QNet:
         return q_table
     
     def get_greedy_policy(self):
+        """ Given the current q-net, find the greedy action and return the
+        corresponding greedy policy. """
         policy = {}
         for w in range(self.width):
             for h in range(self.height):
@@ -321,21 +340,21 @@ class QNet:
 
 
 class QLearner:
-    """ Main class to train Q-table and Q-net for the Maze environment. """
-    def __init__(self, env, alpha=5e-4, gamma=0.99, batch_size=128,
-                 q_function='table'):
+    """ Main class to train Q-table and Q-net for the maze environment. """
+    def __init__(self, env, alpha=1e-3, gamma=0.99, batch_size=128,
+                 q_function='table', epsilon_init=0.99, epsilon_final=0.05):
 
         self.env = env
         self.alpha = alpha
         self.gamma = gamma
         self.batch_size = batch_size
-        self.epsilon_init = 0.95
-        self.epsilon_final = 0.02
+        self.epsilon_init = epsilon_init
+        self.epsilon_final = epsilon_final
 
         # For experience replay
         dim_action = 1
         dim_state = 2
-        self.buffer = ReplayBuffer(1000, dim_state, dim_action)
+        self.buffer = ReplayBuffer(10000, dim_state, dim_action)
 
         if q_function == 'table':
             self.q_func = QTable(env, alpha, gamma)
@@ -343,8 +362,9 @@ class QLearner:
             self.q_func = QNet(env, alpha, gamma)
 
     def train(self, n_episodes):
+        """ Run the training loop for the given number of episodes. """
         epsilon = self.epsilon_init
-        for i in tqdm.trange(n_episodes):
+        for i in trange(n_episodes):
             epsilon -= (self.epsilon_final - self.epsilon_init) / n_episodes
             state = self.env.reset()
             done = False
@@ -367,8 +387,11 @@ class QLearner:
             self.q_func.update(minibatch)
 
     def plot_training_evolution(self):
+        """ Show the evolution of Q-values over the training period. Note:
+        only works for the q_function='table' for the moment. """
         if isinstance(self.q_func, QTable):
-            plt.figure(figsize=(7.5, 5))
+            plt.figure(figsize=(7, 4.5))
+            plt.suptitle('Evolution of Q-values during training', fontsize=18)
 
             cmap = {
                 (0, 0): plt.get_cmap('Blues'),
@@ -384,9 +407,9 @@ class QLearner:
                     vv = np.array(vv)
                     if self.env.width < 3 and self.env.height < 3:
                         c = cmap[k]((i+1)/5.)
-                        plt.plot(vv, label=f'Q({k}, {kk})', c=c)
+                        plt.plot(vv, label=f"Q({k}, '{kk}')", c=c)
                     else:
-                        plt.plot(vv, label=f'Q({k}, {kk})')
+                        plt.plot(vv, label=f"Q({k}, '{kk}')")
 
             plt.legend(ncol=3, fontsize=12, bbox_to_anchor=(1.02, 1))
             plt.xlabel('Episode')
@@ -409,6 +432,7 @@ class ReplayBuffer:
         self.ptr, self.size, self.max_size = 0, 0, size
 
     def push(self, obs, act, rew, next_obs, done):
+        """ Add a new experience to the buffer. """
         self.obs1_buf[self.ptr] = obs
         self.obs2_buf[self.ptr] = next_obs
         self.acts_buf[self.ptr] = act
@@ -418,6 +442,7 @@ class ReplayBuffer:
         self.size = min(self.size + 1, self.max_size)
 
     def sample(self, batch_size):
+        """ Sample batch_size memories from the buffer. """
         idxs = np.random.randint(0, self.size, size=batch_size)
         temp_dict = dict(s=self.obs1_buf[idxs],
                          s2=self.obs2_buf[idxs],
@@ -426,3 +451,4 @@ class ReplayBuffer:
                          d=self.done_buf[idxs])
         return (temp_dict['s'], temp_dict['a'], temp_dict['r'].reshape(-1, 1),
                 temp_dict['s2'], temp_dict['d'])
+
