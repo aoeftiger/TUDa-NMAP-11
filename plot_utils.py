@@ -78,6 +78,7 @@ def plot_q_table(q_table, target, fire, ax):
 
 
 def print_qtable(q_table):
+    """ Pretty print the Q-table values. """
     tab = PrettyTable([['s \ a', 'up', 'down', 'left', 'right']][0])
     for k, v in q_table.items():
         vals = [k]
