@@ -27,7 +27,7 @@ def plot_v_table(v_table, target, fire, ax):
         if (k == target).all():
             continue
         ax.text(k[0] + 0.5, k[1] + 0.5, s=f'{v:.1f}', ha='center', va='center',
-                color='tab:red')
+                color='tab:red', fontsize=12)
         
 
 def plot_q_table(q_table, target, fire, ax):
@@ -50,7 +50,7 @@ def plot_q_table(q_table, target, fire, ax):
                  head_width=0.1, head_length=0.1)
         q_up = v['up']
         ax.text(k[0] + 0.5, k[1] + 0.85, s=f'{q_up:.1f}', ha='center', va='center',
-                color=cols['up'])
+                color=cols['up'], fontsize=10)
 
         # DOWN
         ax.arrow(k[0] + 0.5, k[1] + 0.45, 0., -0.15,
@@ -58,7 +58,7 @@ def plot_q_table(q_table, target, fire, ax):
                  head_width=0.1, head_length=0.1)       
         q_down = v['down']
         ax.text(k[0] + 0.5, k[1] + 0.15, s=f'{q_down:.1f}', ha='center', va='center',
-                color=cols['down'])
+                color=cols['down'], fontsize=10)
 
         # RIGHT
         ax.arrow(k[0] + 0.55, k[1] + 0.5, 0.15, 0.,
@@ -66,7 +66,7 @@ def plot_q_table(q_table, target, fire, ax):
                  head_width=0.1, head_length=0.1)
         q_right = v['right']
         ax.text(k[0] + 0.8, k[1] + 0.6, s=f'{q_right:.1f}', ha='center', va='center',
-                color=cols['right'])
+                color=cols['right'], fontsize=10)
 
         # LEFT
         ax.arrow(k[0] + 0.45, k[1] + 0.5, -0.15, 0.,
@@ -74,7 +74,7 @@ def plot_q_table(q_table, target, fire, ax):
                  head_width=0.1, head_length=0.1)
         q_left = v['left']
         ax.text(k[0] + 0.2, k[1] + 0.6, s=f'{q_left:.1f}', ha='center', va='center',
-                color=cols['left'])
+                color=cols['left'], fontsize=10)
 
 
 def print_qtable(q_table):

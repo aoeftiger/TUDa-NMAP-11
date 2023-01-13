@@ -135,7 +135,7 @@ class Maze:
             title += f'new_state: {new_state}\ndone: {done}'
 
         fig = plt.figure(figsize=(self.width, self.height))
-        plt.figtext(0.95, 0.8, title, va='top')
+        plt.figtext(0.95, 0.8, title, va='top', fontsize=14)
 
         for h in range(self.height):
             plt.axhline(h, color='k', lw=1)
@@ -278,7 +278,7 @@ class QNet:
         model.add(Dense(32, activation="relu", input_dim=self.dim_state))
         model.add(Dense(32, activation="relu"))
         model.add(Dense(self.num_actions, activation="linear"))
-        model.compile(loss="mse", optimizer=Adam(lr=self.alpha))
+        model.compile(loss="mse", optimizer=Adam(learning_rate=self.alpha))
         return model
     
     def update(self, samples):
@@ -292,15 +292,15 @@ class QNet:
 
         # Calculate target Q according to TD(0) rule
         target_q = (rewards.flatten() + (1-dones) * self.gamma * np.amax(
-            self.q_model.predict(next_states), axis=1))        
-        target_f = self.q_model.predict(states)
+            self.q_model.predict(next_states, verbose=0), axis=1))        
+        target_f = self.q_model.predict(states, verbose=0)
         actions = np.int_(actions).flatten()
         for i in range(target_f.shape[0]):
             target_f[i, actions[i]] = target_q[i]
 
         # Update network weights
         self.q_model.fit(states, target_f, epochs=1, verbose=0)
-        
+
     def get_greedy_action(self, state):
         """ Given the state, return the action that maximizes the Q-value given
         the current Q-net. """
@@ -314,7 +314,7 @@ class QNet:
         v_table = {}
         for w in range(self.width):
             for h in range(self.height):
-                v_table[(w, h)] = np.max(self.q_model.predict([[w, h]]))
+                v_table[(w, h)] = np.max(self.q_model.predict([[w, h]], verbose=0))
         return v_table
     
     def get_q_table(self):
@@ -324,7 +324,7 @@ class QNet:
         for w in range(self.width):
             for h in range(self.height):
                 q_table[(w, h)] = {}
-                q_vals = self.q_model.predict([[w, h]])
+                q_vals = self.q_model.predict([[w, h]], verbose=0)
                 for i, action in enumerate(self.action_list):
                     q_table[(w, h)][action] = q_vals[0][i]
         return q_table
@@ -390,8 +390,9 @@ class QLearner:
         """ Show the evolution of Q-values over the training period. Note:
         only works for the q_function='table' for the moment. """
         if isinstance(self.q_func, QTable):
-            plt.figure(figsize=(7, 4.5))
-            plt.suptitle('Evolution of Q-values during training', fontsize=18)
+            plt.figure(figsize=(6, 4))
+            plt.suptitle('Evolution of Q-values during training',
+                         fontsize=16)
 
             cmap = {
                 (0, 0): plt.get_cmap('Blues'),

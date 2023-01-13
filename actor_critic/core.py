@@ -137,7 +137,7 @@ class ClassicalDDPG:
 
     def get_proposed_action(self, state):
         """ Use actor network to obtain proposed action for en input state. """
-        return self.main_actor_net.predict(state.reshape(1, -1))[0]
+        return self.main_actor_net.predict(state.reshape(1, -1), verbose=0)[0]
 
     def update(self, batch_size, *args):
         """ Calculate and apply the updates of the critic and actor
