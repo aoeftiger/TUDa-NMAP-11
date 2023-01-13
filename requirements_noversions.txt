@@ -11,3 +11,4 @@ ipywidgets
 
 tensorflow
 prettytable
+stable_baselines3
