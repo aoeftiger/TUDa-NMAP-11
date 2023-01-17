@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# for jupyterhub at TUDa
+import sys
+sys.path.append('./requirements/lib/python3.8/site-packages/')
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
