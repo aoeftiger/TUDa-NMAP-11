@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm.notebook import trange
+import json
 
 from tensorflow import keras
 from tensorflow.keras.layers import Dense
@@ -201,6 +202,38 @@ class QTable:
             for kk, vv in v.items():
                 self.history[k][kk].append(vv[0])
 
+    def save_q_table(self, filename):
+        """ Save q table to json file. Note that history is lost
+        in that process. """
+
+        # Convert keys from tuple to strings, otherwise json does
+        # not like it.
+        q_save = {}
+        for k, v in self.q.items():
+            d_tmp = {}
+            for kk, vv in self.q[k].items():
+                d_tmp[kk] = vv[0]                
+            q_save[str([int(i) for i in k])] = d_tmp
+
+        with open(filename, 'w') as fid:
+            json.dump(q_save, fid, indent=4)
+
+    def load_q_table(self, filename):
+        """ Load q table from json file. """
+        self._init_history()
+        with open(filename, "r") as fid:
+            q_load = json.load(fid)
+
+        # Turn key back into tuple...
+        q_ = {}
+        for k, v in q_load.items():
+            w = int(k.split(',')[0].split('[')[-1])
+            h = int(k.split(',')[-1].split(']')[0])
+            q_[(w, h)] = {}
+            for kk, vv in q_load[k].items():
+                q_[(w, h)][kk] = [vv]
+        self.q = q_
+
     def update(self, samples):
         """ Perform the TD rule update to the Q-table using a batch of
         samples. """
@@ -337,6 +370,14 @@ class QNet:
             for h in range(self.height):
                 policy[(w, h)] = self.get_greedy_action((w, h))
         return policy
+
+    def save_model(self, filename):
+        """ Save the weights of the q-net model. """
+        self.q_model.save_weights(filename)
+
+    def load_model(self, filename):
+        """ Load the weights of a saved q-net model. """
+        self.q_model.load_weights(filename)
 
 
 class QLearner:

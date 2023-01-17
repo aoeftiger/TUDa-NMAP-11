@@ -207,6 +207,22 @@ class ClassicalDDPG:
                               (1 - self.tau_actor) * target_weights)
         self.target_actor_net.set_weights(new_target_weights)
 
+    def save_actor_critic_weights(self, filename):
+        """ Save the weights of all four networks for reloading them
+        later on. """
+        self.main_actor_net.save_weights(filename + "_main_actor")
+        self.target_actor_net.save_weights(filename + "_target_actor")
+        self.main_critic_net_1.save_weights(filename + "_main_critic")
+        self.target_critic_net_1.save_weights(filename + "_target_critic")
+
+
+    def load_actor_critic_weights(self, filename):
+        """ Load the weights of all four networks from file. """
+        self.main_actor_net.load_weights(filename + "_main_actor")
+        self.target_actor_net.load_weights(filename + "_target_actor")
+        self.main_critic_net_1.load_weights(filename + "_main_critic")
+        self.target_critic_net_1.load_weights(filename + "_target_critic")
+
 
 def trainer(env, agent, n_steps, batch_size=32, action_noise=0.1,
             epsilon_greedy_i=0.9, epsilon_greedy_f=0.0, n_exploration_steps=0):
