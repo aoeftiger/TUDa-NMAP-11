@@ -9,7 +9,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import Sequential
 
 
-class Maze:
+class Maze(object):
     """ Define a simple grid maze environment. """
     def __init__(self, height=4, width=4, target_position=None,
                  fire_reward=-10, fire_positions=None):
@@ -126,17 +126,18 @@ class Maze:
         y = np.random.randint(low=0, high=self.height, size=1)[0]
         return np.asarray([x, y])
     
-    def plot(self, add_player_position=True, title=""):
+    def plot(self, add_player_position=True, title=True):
         """ Plot main maze grid incl. special fields. """
 
         # Title shows the last step, if it exists
-        if self.previous_step_log:
+        if self.previous_step_log and title:
             state, action, reward, new_state, done = self.previous_step_log
             title = f'old_state: {state}\naction: {action}\nreward: {reward}\n'
             title += f'new_state: {new_state}\ndone: {done}'
 
         fig = plt.figure(figsize=(self.width, self.height))
-        plt.figtext(0.95, 0.8, title, va='top', fontsize=14)
+        if title:
+            plt.figtext(0.95, 0.8, title, va='top', fontsize=14)
 
         for h in range(self.height):
             plt.axhline(h, color='k', lw=1)
@@ -171,7 +172,7 @@ class Maze:
         return plt.gca()
 
 
-class QTable:
+class QTable(object):
     """ Implement Q-function as Q-table. """
     def __init__(self, env, alpha, gamma):
         self.alpha = alpha
@@ -290,7 +291,7 @@ class QTable:
         return policy
 
 
-class QNet:
+class QNet(object):
     """ Implement Q-function as Q-network. """
     def __init__(self, env, alpha=1e-3, gamma=0.99):
         self.action_list = list(env.action_mapper.keys())
