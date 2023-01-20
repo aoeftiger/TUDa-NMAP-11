@@ -6,6 +6,8 @@ from tensorflow.keras.layers import Dense, Input, concatenate
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import MSE
 
+from tqdm.notebook import tqdm
+
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -245,6 +247,7 @@ def trainer(env, agent, n_steps, batch_size=32, action_noise=0.1,
 
     n_total_steps_training = 0
     episode = 0
+    pbar = tqdm(total=n_steps)
     while n_total_steps_training < n_steps:
 
         n_random_steps_episode = 0
@@ -313,6 +316,7 @@ def trainer(env, agent, n_steps, batch_size=32, action_noise=0.1,
                 break
 
             state = next_state
+        pbar.update(n_steps_episode)
 
     return episode_log
 
@@ -330,10 +334,10 @@ def plot_training_log(env, agent, data, apply_scaling=True):
     else:
         scaling = 1.
 
-    axs[0].plot(data['n_total_steps'])
+    axs[0].plot(data['n_total_steps'], c='orange')
     axs[1].plot(np.array(data['initial_rewards'])[-n_training_episodes:] * scaling,
-                c='r', label='At episode start')
-    axs[1].plot(np.array(data['final_rewards']) * scaling, c='g',
+                c='tab:red', label='At episode start')
+    axs[1].plot(np.array(data['final_rewards']) * scaling, c='lightsteelblue',
                 label='At episode end')
     # try:
     #     axs[1].axhline(env.reward_threshold * scaling, color='k', ls='--')
@@ -364,7 +368,7 @@ def run_correction(env, agent):
         if done:
             break
 
-    plt.plot(scaling*state, marker='o', c='tab:green', label=f'After correction')
+    plt.plot(scaling*state, marker='D', c='lightsteelblue', label='After correction')
     
     max_pos = max(max_pos, np.max(np.abs(scaling * state))) * 1.2
     plt.ylim(-max_pos, max_pos)
