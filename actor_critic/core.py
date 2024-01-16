@@ -196,17 +196,27 @@ class ClassicalDDPG:
     def _update_target_networks(self):
         """ Apply Polyak update to both target networks. """
         # CRITICS
-        target_weights = np.array(self.target_critic_net_1.get_weights())
-        main_weights = np.array(self.main_critic_net_1.get_weights())
-        new_target_weights = (self.tau_critic * main_weights +
-                              (1 - self.tau_critic) * target_weights)
+        target_weights = self.target_critic_net_1.get_weights()
+        main_weights = self.main_critic_net_1.get_weights()
+        new_target_weights = []
+        for i in range(len(target_weights)):
+            new_weights = (
+                self.tau_critic * main_weights[i] +
+                (1 - self.tau_critic) * target_weights[i]
+            )
+            new_target_weights.append(new_weights)
         self.target_critic_net_1.set_weights(new_target_weights)
 
         # ACTOR
-        target_weights = np.array(self.target_actor_net.get_weights())
-        main_weights = np.array(self.main_actor_net.get_weights())
-        new_target_weights = (self.tau_actor * main_weights +
-                              (1 - self.tau_actor) * target_weights)
+        target_weights = self.target_actor_net.get_weights()
+        main_weights = self.main_actor_net.get_weights()
+        new_target_weights = []
+        for i in range(len(target_weights)):
+            new_weights = (
+                self.tau_actor * main_weights[i] +
+                (1 - self.tau_actor) * target_weights[i]
+            )
+            new_target_weights.append(new_weights)
         self.target_actor_net.set_weights(new_target_weights)
 
     def save_actor_critic_weights(self, filename):
